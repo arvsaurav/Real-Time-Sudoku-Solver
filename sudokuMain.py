@@ -1,4 +1,5 @@
 import cv2
+import sudokuFunctions
 
 # use of webcam to capture image of sudoku
 
@@ -30,3 +31,17 @@ widthImg = 450
 img = cv2.imread(capturedImage)
 # resize image to make it a square image
 img = cv2.resize(img, (widthImg, heightImg))
+imgThreshold = sudokuFunctions.preProcess(img)
+
+# finding all contours
+
+# contour - a curve joining all the continuous points (along the boundary), having same color or intensity
+
+# copying image for displaying purpose
+imgContour = img.copy()
+imgBigContour = img.copy()
+# contours variable will store Python list of all contours in the image.
+# Each individual contour is a Numpy array of (x,y) coordinates of boundary points of the object.
+contours, hierarchy = cv2.findContours(imgThreshold, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+# draw all detected contours
+cv2.drawContours(imgContour, contours, -1, (0, 225, 0), 3)
