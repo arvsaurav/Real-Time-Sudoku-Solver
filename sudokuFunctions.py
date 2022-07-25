@@ -15,19 +15,37 @@ def preProcess(frame):
 # 2. Finding the biggest contour assuming that is the sudoku puzzle
 
 def biggestContour(contours):
-    maxArea = 0
-    # maxContour -> contour having maximum area
+    # maxContour -> will store all the points of biggest contour
     maxContour = np.array([])
-    # our sudoku grid will be a polygon having 4 sides and maximum area among all the polygons.
+    # maxArea -> will store maximum area of the above biggest contour
+    maxArea = 0
+    # our sudoku grid will be a polygon having 4 sides and having maximum area among all the polygons.
     # loop to find out sudoku grid
     for currentContour in contours:
         area = cv2.contourArea(currentContour)
         if area > 50:
             perimeter = cv2.arcLength(currentContour, True)
             # cv2.approxPolyDP() function with a precision factor is applied to approximate/determine the shape of the polygon.
+            # cv2.approxPolyDP() returns set of (x, y) points.
+            # i.e., if the polygon is square or rectangle, cv2.approxPolyDp() will return 4 sets of (x,y) coordinates in numpy array
             approximation = cv2.approxPolyDP(currentContour, 0.02 * perimeter, True)
 
             if area > maxArea and len(approximation) == 4:
                 maxArea = area
                 maxContour = approximation
     return maxContour, maxArea
+
+# 3. Reordering points for warp perspective
+
+# arranging our four points in top-left, top-right, bottom-left, and bottom-right order
+def reorder(biggest):
+    biggest = biggest.reshape((4, 2))
+    newBiggest = np.zeros((4, 1, 2), dtype=np.int32)
+    add = biggest.sum(1)
+    newBiggest[0] = biggest[np.argmin(add)]
+    newBiggest[3] = biggest[np.argmax(add)]
+    diff = np.diff(biggest, axis=1)
+    newBiggest[1] = biggest[np.argmin(diff)]
+    newBiggest[2] = biggest[np.argmax(diff)]
+    return newBiggest
+
